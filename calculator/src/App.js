@@ -1,5 +1,4 @@
 import Buttons from './Components/Buttons';
-import DisplayScreen from './Components/DisplayScreen';
 import './App.css';
 import React from 'react';
 
@@ -7,33 +6,63 @@ class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      currentNumber: 0,
+      currentNumber: '',
+      savedNumbers: [],
       operation: '',
       result: 0,
     }
   }
 
-
-
   handleNumberClick = (event) => {
     this.setState({
-      currentNumber: this.state.currentNumber += event.target.value
+      currentNumber: Number(this.state.currentNumber += event.target.value)
     })
   }
 
   handleOperatorClick = (event) => {
     this.setState({
-      operation: event.target.value
+      operation: event.target.value,
+      savedNumbers: [...this.state.savedNumbers, Number(this.state.currentNumber)],
+      currentNumber: '',
     })
-    console.log(event.target.value)
   }
 
-  handleClearButton = (event) => {
+  handleClearButton = () => {
     this.setState({
-      operation: event.target.value,
+      operation: '',
       currentNumber: 0,
-      result: 0,
+      savedNumbers: [],
     })
+  }
+
+  handleCalculateButton = async () => {
+    //map over the values and provide a result of the operation over the value
+    await this.setState({
+      savedNumbers: [...this.state.savedNumbers, Number(this.state.currentNumber)],
+      currentNumber: '',
+    })
+    let total;
+    if (this.state.operation === '+') {
+      total = this.state.savedNumbers.reduce(function (passedIn, Item) {
+        return passedIn + Number(Item)
+      }, 0);
+    }
+    if (this.state.operation === '*') {
+      total = this.state.savedNumbers.reduce(function (passedIn, Item) {
+        return passedIn * Number(Item)
+      }, 1);
+    }
+    if (this.state.operation === '/') {
+      total = this.state.savedNumbers.reduce(function (passedIn, Item) {
+        return passedIn / Number(Item)
+      });
+    }
+    if (this.state.operation === '-') {
+      total = this.state.savedNumbers.reduce(function (passedIn, Item) {
+        return passedIn - Number(Item)
+      });
+    }
+    this.setState({ currentNumber: total })
   }
 
 
@@ -43,23 +72,13 @@ class App extends React.Component {
     })
 
 
-
-    const { currentNumber } = this.state;
     return (
-
       <div className="App">
-        <div className='DisplayScreen'>{this.state.currentNumber}{this.state.operation}</div>
+        <div className='DisplayScreen'>{this.state.currentNumber}</div>
         <div className='NumberButtons'>
           {numberButton}
         </div>
-        <div className='OperationButton'>
-          <button name='multiply' value='*' onClick={this.handleOperatorClick}>x</button>
-          <button name='divide' value='/' onClick={this.handleOperatorClick}>/</button>
-          <button name='add' value='+' onClick={this.handleOperatorClick}>+</button>
-          <button name='subtract' value='-' onClick={this.handleOperatorClick}>-</button>
-        </div>
-        <button name='equals' value='equals' onClick={this.calculateButton}>=</button>
-        <button name='clear' value='clear' onClick={this.handleClearButton}>Clear</button>
+        <Buttons handleCalculateButton={this.handleCalculateButton} handleClearButton={this.handleClearButton} handleNumberClick={this.handleNumberClick} handleOperatorClick={this.handleOperatorClick} />
 
       </div>
 
